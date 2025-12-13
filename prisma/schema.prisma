@@ -7,7 +7,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  sslcert  = env("DB_CERT")
 }
 
 model application {
