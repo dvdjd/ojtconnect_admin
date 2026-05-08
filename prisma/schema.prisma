@@ -1,8 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
-
 
 datasource db {
   provider = "postgresql"
@@ -10,19 +9,28 @@ datasource db {
 }
 
 model application {
-  application_id   String          @id
-  job_id           String
-  student_id       String
-  message          String
-  resume           String
-  status           String          @default("pending") @db.VarChar(15)
-  application_date DateTime        @default(now())
-  interview_date   DateTime?
-  meeting_link     String?
-  is_accepted      Boolean         @default(false)
-  m_id             String?         @db.VarChar(50)
-  job_post         job_post        @relation(fields: [job_id], references: [job_id])
-  student_profile  student_profile @relation(fields: [student_id], references: [student_id])
+  application_id     String               @id
+  job_id             String
+  student_id         String
+  message            String
+  resume             String
+  status             String               @default("pending") @db.VarChar(15)
+  application_date   DateTime             @default(now())
+  interview_date     DateTime?
+  meeting_link       String?
+  is_accepted        Boolean              @default(false)
+  m_id               String?              @db.VarChar(50)
+  is_withdrawn       Boolean              @default(false)
+  rejection_reason   String?
+  notes              String?
+  job_post           job_post             @relation(fields: [job_id], references: [job_id])
+  student_profile    student_profile      @relation(fields: [student_id], references: [student_id])
+  interview_schedule interview_schedule[]
+  student_placement  student_placement[]
+
+  @@index([job_id], map: "idx_application_job")
+  @@index([status], map: "idx_application_status")
+  @@index([student_id], map: "idx_application_student")
 }
 
 model bookmark {
@@ -33,29 +41,39 @@ model bookmark {
   m_id            String?         @db.VarChar(50)
   job_post        job_post        @relation(fields: [job_id], references: [job_id])
   student_profile student_profile @relation(fields: [student_id], references: [student_id])
+
+  @@index([job_id], map: "idx_bookmark_job")
+  @@index([student_id], map: "idx_bookmark_student")
 }
 
 model company_profile {
-  company_id     String      @id
-  user_id        String      @unique
-  name           String      @db.VarChar(100)
-  company_type   String?     @db.VarChar(100)
-  avatar         String?
-  phone_number   String?
-  business_proof String?
-  about_me       String?
-  fb_link        String?
-  instagram_link String?
-  linkedin_link  String?
-  portfolio_link String?
-  date_created   DateTime    @default(now())
-  date_updated   DateTime    @default(now())
-  country        String?     @db.VarChar(100)
-  state          String?     @db.VarChar(100)
-  m_id           String?     @db.VarChar(50)
-  address_line   String?     @db.VarChar(128)
-  user_access    user_access @relation(fields: [user_id], references: [user_id])
-  job_post       job_post[]
+  company_id            String                  @id
+  user_id               String                  @unique
+  name                  String                  @db.VarChar(100)
+  company_type          String?                 @db.VarChar(100)
+  avatar                String?
+  phone_number          String?
+  business_proof        String?
+  about_me              String?
+  fb_link               String?
+  instagram_link        String?
+  linkedin_link         String?
+  portfolio_link        String?
+  date_created          DateTime                @default(now())
+  date_updated          DateTime                @default(now())
+  country               String?                 @db.VarChar(100)
+  state                 String?                 @db.VarChar(100)
+  m_id                  String?                 @db.VarChar(50)
+  address_line          String?                 @db.VarChar(128)
+  city                  String?                 @db.VarChar(100)
+  user_access           user_access             @relation(fields: [user_id], references: [user_id])
+  employer_feedback     employer_feedback[]
+  employer_subscription employer_subscription[]
+  job_post              job_post[]
+  student_placement     student_placement[]
+
+  @@index([name], map: "idx_company_name")
+  @@index([company_type], map: "idx_company_type")
 }
 
 model field_of_expertise {
@@ -64,46 +82,73 @@ model field_of_expertise {
 }
 
 model job_post {
-  job_id          String          @id
-  company_id      String
-  position        String?         @db.VarChar(100)
-  category        String?         @db.VarChar(40)
-  work_setup      String?         @db.VarChar(20)
-  description     String?
-  duration        String?
-  hours_per_week  String?
-  status          String?         @db.VarChar(15)
-  is_available    Boolean         @default(true)
-  date_posted     DateTime?       @default(now())
-  m_id            String?         @db.VarChar(50)
-  application     application[]
-  bookmark        bookmark[]
-  company_profile company_profile @relation(fields: [company_id], references: [company_id])
+  job_id                String                  @id
+  company_id            String
+  position              String?                 @db.VarChar(100)
+  category              String?                 @db.VarChar(40)
+  work_setup            String?                 @db.VarChar(20)
+  description           String?
+  duration              String?
+  hours_per_week        String?
+  status                String?                 @db.VarChar(15)
+  is_available          Boolean                 @default(true)
+  date_posted           DateTime?               @default(now())
+  m_id                  String?                 @db.VarChar(50)
+  application           application[]
+  bookmark              bookmark[]
+  company_profile       company_profile         @relation(fields: [company_id], references: [company_id])
+  job_requirement       job_requirement[]
+  job_skill_requirement job_skill_requirement[]
+  ojt_tracking          ojt_tracking[]
+
+  @@index([is_available], map: "idx_jobpost_available")
+  @@index([category], map: "idx_jobpost_category")
+  @@index([company_id], map: "idx_jobpost_company")
+  @@index([status], map: "idx_jobpost_status")
 }
 
 model student_profile {
-  student_id     String        @id
-  user_id        String        @unique
-  name           String        @db.VarChar(1000)
-  university     String?       @db.VarChar(1000)
-  course         String?       @db.VarChar(1000)
-  level          String?       @db.VarChar(50)
-  avatar         String?
-  phone_number   String?
-  skills         String?
-  certificate    String?
-  organization   String?
-  about_me       String?
-  instagram_link String?
-  linkedin_link  String?
-  portfolio_link String?
-  date_created   DateTime?     @default(now())
-  date_updated   DateTime?     @default(now())
-  m_id           String?       @db.VarChar(50)
-  fb_link        String?
-  application    application[]
-  bookmark       bookmark[]
-  user_access    user_access   @relation(fields: [user_id], references: [user_id])
+  student_id        String              @id
+  user_id           String              @unique
+  university        String?             @db.VarChar(1000)
+  course            String?             @db.VarChar(1000)
+  level             String?             @db.VarChar(50)
+  avatar            String?
+  phone_number      String?
+  skills            String?
+  certificate       String?
+  organization      String?
+  about_me          String?
+  instagram_link    String?
+  linkedin_link     String?
+  portfolio_link    String?
+  date_created      DateTime?           @default(now())
+  date_updated      DateTime?           @default(now())
+  m_id              String?             @db.VarChar(50)
+  fb_link           String?
+  first_name        String?             @db.VarChar(500)
+  last_name         String?             @db.VarChar(500)
+  academic_cluster  String?             @db.VarChar(200)
+  standing          String?             @db.VarChar(100)
+  training_hours    String?             @db.VarChar(50)
+  degree            String?             @db.VarChar(100)
+  major             String?             @db.VarChar(100)
+  city              String?             @db.VarChar(100)
+  application       application[]
+  bookmark          bookmark[]
+  employer_feedback employer_feedback[]
+  ojt_tracking      ojt_tracking[]
+  resume_education  resume_education[]
+  resume_experience resume_experience[]
+  resume_skills     resume_skills[]
+  student_document  student_document[]
+  student_placement student_placement[]
+  user_access       user_access         @relation(fields: [user_id], references: [user_id])
+  student_resume    student_resume[]
+  student_skill     student_skill[]
+
+  @@index([course], map: "idx_student_course")
+  @@index([university], map: "idx_student_university")
 }
 
 model university {
@@ -124,52 +169,68 @@ model university_admin {
   admin_name    String   @db.VarChar(100)
   position      String   @db.VarChar(50)
   date_created  DateTime @default(now())
+  department    String   @db.VarChar(100)
+
+  @@index([university_id], map: "idx_univ_admin_univ")
 }
 
 model university_profile {
-  university_id   String      @id
-  user_id         String      @unique
-  position        String      @db.VarChar(100)
-  avatar          String?
-  phone_number    String?
-  business_proof  String?
-  about_me        String?
-  fb_link         String?
-  instagram_link  String?
-  linkedin_link   String?
-  portfolio_link  String?
-  date_created    DateTime    @default(now())
-  date_updated    DateTime    @default(now())
-  address_line    String      @db.VarChar(100)
-  state           String      @db.VarChar(50)
-  admin_name      String      @db.VarChar(100)
-  department      String      @db.VarChar(100)
-  university_name String      @db.VarChar(100)
-  university_type String      @db.VarChar(100)
-  country         String      @db.VarChar(50)
-  user_access     user_access @relation(fields: [user_id], references: [user_id])
+  university_id                 String                          @id
+  user_id                       String                          @unique
+  position                      String                          @db.VarChar(100)
+  avatar                        String?
+  phone_number                  String?
+  business_proof                String?
+  about_me                      String?
+  fb_link                       String?
+  instagram_link                String?
+  linkedin_link                 String?
+  portfolio_link                String?
+  date_created                  DateTime                        @default(now())
+  date_updated                  DateTime                        @default(now())
+  address_line                  String                          @db.VarChar(100)
+  state                         String                          @db.VarChar(50)
+  admin_name                    String                          @db.VarChar(100)
+  department                    String                          @db.VarChar(100)
+  university_name               String                          @db.VarChar(100)
+  university_type               String                          @db.VarChar(100)
+  country                       String                          @db.VarChar(50)
+  ojt_tracking                  ojt_tracking[]
+  university_analytics_snapshot university_analytics_snapshot[]
+  university_coordinator        university_coordinator[]
+  university_department         university_department[]
+  user_access                   user_access                     @relation(fields: [user_id], references: [user_id])
+  university_subscription       university_subscription[]
+
+  @@index([university_name], map: "idx_univ_name")
+  @@index([university_type], map: "idx_univ_type")
 }
 
 model user_access {
-  user_id            String              @id
-  email              String              @unique @db.VarChar(100)
-  password           String              @db.VarChar(100)
-  type               String              @db.VarChar(15)
-  is_verify          Boolean             @default(false)
-  date_created       DateTime            @default(now())
-  last_login         DateTime?           @default(now())
-  m_id               String?             @db.VarChar(50)
-  company_profile    company_profile?
-  student_profile    student_profile?
-  university_profile university_profile?
-  user_logs          user_logs[]
+  user_id                                                              String                   @id
+  email                                                                String                   @unique @db.VarChar(100)
+  password                                                             String                   @db.VarChar(100)
+  type                                                                 String                   @db.VarChar(15)
+  is_verify                                                            Boolean                  @default(false)
+  date_created                                                         DateTime                 @default(now())
+  last_login                                                           DateTime?                @default(now())
+  m_id                                                                 String?                  @db.VarChar(50)
+  audit_log                                                            audit_log[]
+  company_profile                                                      company_profile?
+  password_reset_token                                                 password_reset_token[]
+  student_evaluation_student_evaluation_evaluatee_user_idTouser_access student_evaluation[]     @relation("student_evaluation_evaluatee_user_idTouser_access")
+  student_evaluation_student_evaluation_evaluator_user_idTouser_access student_evaluation[]     @relation("student_evaluation_evaluator_user_idTouser_access")
+  student_profile                                                      student_profile?
+  university_coordinator                                               university_coordinator[]
+  university_profile                                                   university_profile?
+  user_logs                                                            user_logs[]
 }
 
 model user_admin {
-  id         Int      @id @default(autoincrement())
-  username   String   @unique @db.VarChar(50)
-  password   String   @db.VarChar(50)
-  created_at DateTime @default(now())
+  id         Int       @id @default(autoincrement())
+  username   String?   @db.VarChar(50)
+  password   String?   @db.VarChar(50)
+  created_at DateTime? @default(now())
 }
 
 model user_logs {
@@ -179,4 +240,497 @@ model user_logs {
   log_id      String      @id
   m_id        String?     @db.VarChar(50)
   user_access user_access @relation(fields: [email], references: [email])
+
+  @@index([login_date], map: "idx_userlogs_date")
+  @@index([email], map: "idx_userlogs_email")
+}
+
+model audit_log {
+  log_id       String       @id
+  user_id      String?
+  action       String       @db.VarChar(50)
+  entity_type  String       @db.VarChar(50)
+  entity_id    String
+  old_values   String?
+  new_values   String?
+  ip_address   String?      @db.VarChar(45)
+  date_created DateTime     @default(now()) @db.Timestamp(6)
+  user_access  user_access? @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([action], map: "idx_audit_action")
+  @@index([date_created], map: "idx_audit_date")
+  @@index([entity_type, entity_id], map: "idx_audit_entity")
+  @@index([user_id], map: "idx_audit_user")
+}
+
+model billing_history {
+  billing_id              String                  @id
+  subscription_id         String
+  amount                  Decimal                 @db.Decimal(10, 2)
+  currency                String                  @default("USD") @db.VarChar(3)
+  payment_method          String?                 @db.VarChar(50)
+  payment_status          String                  @db.VarChar(20)
+  invoice_url             String?
+  billing_date            DateTime                @db.Timestamp(6)
+  date_created            DateTime                @default(now()) @db.Timestamp(6)
+  university_subscription university_subscription @relation(fields: [subscription_id], references: [subscription_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([billing_date], map: "idx_billing_date")
+  @@index([subscription_id], map: "idx_billing_subscription")
+}
+
+model daily_time_record {
+  dtr_id          String       @id
+  ojt_tracking_id String
+  date_created    DateTime     @default(now())
+  work_type       String       @db.VarChar(50)
+  time_in         DateTime     @db.Timestamp(6)
+  time_out        DateTime     @db.Timestamp(6)
+  activity_notes  String?      @db.VarChar(255)
+  status          String       @db.VarChar(15)
+  break_time      Int          @default(0)
+  hours_rendered  Decimal      @default(0) @db.Decimal(10, 2)
+  ojt_tracking    ojt_tracking @relation(fields: [ojt_tracking_id], references: [ojt_tracking_id])
+
+  @@index([ojt_tracking_id], map: "idx_dtr_ojt_tracking")
+  @@index([status], map: "idx_ojt_dtr_status")
+}
+
+model employer_feedback {
+  feedback_id               String                   @id
+  placement_id              String?
+  student_id                String
+  company_id                String
+  report_type               String                   @db.VarChar(10)
+  form_type                 String                   @db.VarChar(20)
+  evaluator_name            String                   @db.VarChar(200)
+  evaluator_title           String                   @db.VarChar(200)
+  written_feedback          String
+  overall_rating            Decimal                  @db.Decimal(4, 2)
+  university_overall_rating Decimal?                 @db.Decimal(4, 2)
+  recommendation_status     String?                  @db.VarChar(30)
+  recommendation_quote      String?
+  date_submitted            DateTime                 @default(now()) @db.Timestamp(6)
+  date_updated              DateTime?                @db.Timestamp(6)
+  is_hireable               Boolean                  @default(false)
+  company_profile           company_profile          @relation(fields: [company_id], references: [company_id], onDelete: NoAction, onUpdate: NoAction)
+  student_placement         student_placement?       @relation(fields: [placement_id], references: [placement_id], onDelete: NoAction, onUpdate: NoAction)
+  student_profile           student_profile          @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
+  feedback_rating_factor    feedback_rating_factor[]
+  feedback_strength         feedback_strength[]
+
+  @@index([company_id], map: "idx_feedback_company")
+  @@index([placement_id], map: "idx_feedback_placement")
+  @@index([report_type], map: "idx_feedback_report_type")
+  @@index([student_id], map: "idx_feedback_student")
+}
+
+model employer_subscription {
+  subscription_id      String            @id
+  company_id           String
+  plan_id              String
+  billing_cycle        String            @default("monthly") @db.VarChar(20)
+  status               String            @default("active") @db.VarChar(20)
+  current_period_start DateTime          @db.Timestamp(6)
+  current_period_end   DateTime          @db.Timestamp(6)
+  date_created         DateTime          @default(now()) @db.Timestamp(6)
+  date_updated         DateTime?         @db.Timestamp(6)
+  company_profile      company_profile   @relation(fields: [company_id], references: [company_id], onDelete: NoAction, onUpdate: NoAction)
+  subscription_plan    subscription_plan @relation(fields: [plan_id], references: [plan_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([company_id], map: "idx_emp_sub_company")
+  @@index([status], map: "idx_emp_sub_status")
+}
+
+model error_logs {
+  id            Int      @id @default(autoincrement())
+  error_message String   @db.VarChar(255)
+  timestamp     DateTime @default(now())
+  api_service   String?  @db.VarChar(255)
+  api_response  String?  @db.VarChar(255)
+}
+
+model feature_flag {
+  flag_id      String    @id
+  flag_key     String    @unique @db.VarChar(100)
+  is_enabled   Boolean   @default(false)
+  description  String?
+  date_created DateTime  @default(now()) @db.Timestamp(6)
+  date_updated DateTime? @db.Timestamp(6)
+}
+
+model feedback_rating_factor {
+  factor_id         String            @id
+  feedback_id       String
+  category_label    String?           @db.VarChar(200)
+  factor_name       String            @db.VarChar(200)
+  rating            Int
+  score             Decimal           @db.Decimal(4, 2)
+  sort_order        Int               @default(0)
+  employer_feedback employer_feedback @relation(fields: [feedback_id], references: [feedback_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([feedback_id], map: "idx_rating_factor_feedback")
+}
+
+model feedback_strength {
+  strength_id       String            @id
+  feedback_id       String
+  text              String            @db.VarChar(300)
+  type              String            @db.VarChar(20)
+  employer_feedback employer_feedback @relation(fields: [feedback_id], references: [feedback_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([feedback_id], map: "idx_strength_feedback")
+}
+
+model interview_schedule {
+  interview_id     String      @id
+  application_id   String
+  round            Int         @default(1)
+  interview_type   String?     @db.VarChar(30)
+  scheduled_at     DateTime    @db.Timestamp(6)
+  duration_minutes Int?        @default(60)
+  meeting_link     String?
+  location         String?
+  interviewer_name String?     @db.VarChar(200)
+  status           String      @default("scheduled") @db.VarChar(20)
+  notes            String?
+  date_created     DateTime    @default(now()) @db.Timestamp(6)
+  application      application @relation(fields: [application_id], references: [application_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([application_id], map: "idx_interview_application")
+  @@index([scheduled_at], map: "idx_interview_scheduled")
+}
+
+model job_requirement {
+  requirement_id   String   @id
+  job_id           String
+  requirement_type String   @db.VarChar(30)
+  description      String
+  is_mandatory     Boolean  @default(true)
+  job_post         job_post @relation(fields: [job_id], references: [job_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([job_id], map: "idx_jobreq_job")
+}
+
+model job_skill_requirement {
+  job_id               String
+  skill_id             String
+  proficiency_required String?  @db.VarChar(20)
+  is_mandatory         Boolean  @default(true)
+  job_post             job_post @relation(fields: [job_id], references: [job_id], onDelete: NoAction, onUpdate: NoAction)
+  skill                skill    @relation(fields: [skill_id], references: [skill_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([job_id, skill_id])
+  @@index([skill_id], map: "idx_jobskill_skill")
+}
+
+model notification {
+  notification_id String    @id
+  user_id         String
+  title           String
+  content         String
+  sender_name     String?
+  type            String    @default("general")
+  is_read         Boolean   @default(false)
+  read_at         DateTime?
+  created_at      DateTime  @default(now())
+
+  @@index([is_read], map: "idx_notification_is_read")
+  @@index([user_id], map: "idx_notification_user")
+}
+
+model ojt_tracking {
+  university_id      String
+  student_id         String
+  job_id             String
+  status             String?             @db.VarChar(15)
+  hours_required     Int                 @default(0)
+  start_date         DateTime?           @db.Timestamp(6)
+  end_date           DateTime?           @db.Timestamp(6)
+  ojt_tracking_id    String              @id
+  daily_time_record  daily_time_record[]
+  job_post           job_post            @relation(fields: [job_id], references: [job_id])
+  student_profile    student_profile     @relation(fields: [student_id], references: [student_id])
+  university_profile university_profile  @relation(fields: [university_id], references: [university_id])
+
+  @@index([job_id], map: "idx_ojt_tracking_job")
+  @@index([status], map: "idx_ojt_tracking_status")
+  @@index([student_id], map: "idx_ojt_tracking_student")
+  @@index([university_id], map: "idx_ojt_tracking_university")
+}
+
+model password_reset_token {
+  id          Int         @id @default(autoincrement())
+  user_id     String
+  token       String      @unique @db.VarChar(64)
+  expires_at  DateTime
+  used        Boolean     @default(false)
+  created_at  DateTime    @default(now())
+  user_access user_access @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model platform_config {
+  config_key   String   @id @db.VarChar(100)
+  config_value String?
+  description  String?
+  date_updated DateTime @default(now()) @db.Timestamp(6)
+}
+
+model resume_education {
+  education_id      String          @id
+  student_id        String
+  school_name       String          @db.VarChar(200)
+  degree            String?         @db.VarChar(100)
+  field_of_study    String?         @db.VarChar(100)
+  start_date        String?         @db.VarChar(20)
+  end_date          String?         @db.VarChar(20)
+  gpa               Decimal?        @db.Decimal(5, 2)
+  honors            String?         @db.VarChar(100)
+  description       String?
+  date_created      DateTime        @default(now())
+  resume_builder_id String?         @db.VarChar(50)
+  student_profile   student_profile @relation(fields: [student_id], references: [student_id])
+
+  @@index([student_id], map: "idx_edu_student")
+}
+
+model resume_experience {
+  experience_id     String          @id
+  student_id        String
+  company_name      String          @db.VarChar(200)
+  position          String          @db.VarChar(100)
+  employment_type   String?         @db.VarChar(50)
+  start_date        String?         @db.VarChar(20)
+  end_date          String?         @db.VarChar(20)
+  description       String?
+  date_created      DateTime        @default(now())
+  location          String?         @db.VarChar(200)
+  resume_builder_id String?         @db.VarChar(50)
+  student_profile   student_profile @relation(fields: [student_id], references: [student_id])
+
+  @@index([student_id], map: "idx_exp_student")
+}
+
+model resume_skills {
+  skill_entry_id    String          @id
+  student_id        String
+  technical_skills  String?
+  soft_skills       String?
+  languages         String?
+  date_created      DateTime        @default(now())
+  resume_builder_id String?         @db.VarChar(50)
+  description       String?
+  title             String?         @db.VarChar(200)
+  student_profile   student_profile @relation(fields: [student_id], references: [student_id])
+
+  @@index([student_id], map: "idx_skills_student")
+}
+
+model skill {
+  skill_id              String                  @id
+  skill_name            String                  @unique @db.VarChar(100)
+  category              String?                 @db.VarChar(50)
+  job_skill_requirement job_skill_requirement[]
+  student_skill         student_skill[]
+
+  @@index([skill_name], map: "idx_skill_name")
+}
+
+model student_document {
+  document_id     String          @id
+  student_id      String
+  document_type   String          @db.VarChar(30)
+  document_name   String          @db.VarChar(200)
+  file_url        String
+  version         Int             @default(1)
+  is_primary      Boolean         @default(false)
+  date_uploaded   DateTime        @default(now()) @db.Timestamp(6)
+  student_profile student_profile @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([student_id], map: "idx_doc_student")
+  @@index([document_type], map: "idx_doc_type")
+}
+
+model student_evaluation {
+  evaluation_id                                                 String            @id
+  placement_id                                                  String
+  evaluator_user_id                                             String
+  evaluatee_user_id                                             String
+  evaluation_type                                               String            @db.VarChar(30)
+  rating                                                        Int
+  comments                                                      String?
+  is_anonymous                                                  Boolean           @default(false)
+  date_created                                                  DateTime          @default(now()) @db.Timestamp(6)
+  user_access_student_evaluation_evaluatee_user_idTouser_access user_access       @relation("student_evaluation_evaluatee_user_idTouser_access", fields: [evaluatee_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  user_access_student_evaluation_evaluator_user_idTouser_access user_access       @relation("student_evaluation_evaluator_user_idTouser_access", fields: [evaluator_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  student_placement                                             student_placement @relation(fields: [placement_id], references: [placement_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([placement_id], map: "idx_eval_placement")
+  @@index([evaluation_type], map: "idx_eval_type")
+}
+
+model student_placement {
+  placement_id               String               @id
+  application_id             String
+  student_id                 String
+  company_id                 String
+  supervisor_name            String?              @db.VarChar(200)
+  supervisor_email           String?
+  start_date                 DateTime             @db.Date
+  end_date                   DateTime?            @db.Date
+  total_hours_logged         Decimal              @default(0) @db.Decimal(8, 2)
+  status                     String               @default("active") @db.VarChar(20)
+  completion_certificate_url String?
+  date_created               DateTime             @default(now()) @db.Timestamp(6)
+  date_updated               DateTime?            @db.Timestamp(6)
+  employer_feedback          employer_feedback[]
+  student_evaluation         student_evaluation[]
+  application                application          @relation(fields: [application_id], references: [application_id], onDelete: NoAction, onUpdate: NoAction)
+  company_profile            company_profile      @relation(fields: [company_id], references: [company_id], onDelete: NoAction, onUpdate: NoAction)
+  student_profile            student_profile      @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([company_id], map: "idx_placement_company")
+  @@index([status], map: "idx_placement_status")
+  @@index([student_id], map: "idx_placement_student")
+}
+
+model student_resume {
+  resume_id         String          @id
+  student_id        String
+  filename          String?
+  version           Int             @default(1)
+  is_primary        Boolean         @default(false)
+  date_uploaded     DateTime        @default(now())
+  original_filename String?
+  description       String?         @db.VarChar(500)
+  title             String?         @db.VarChar(200)
+  resume_builder_id String?         @db.VarChar(50)
+  student_profile   student_profile @relation(fields: [student_id], references: [student_id])
+
+  @@index([resume_builder_id], map: "idx_resume_builder_id")
+  @@index([student_id], map: "idx_resume_student")
+}
+
+model student_skill {
+  student_id        String
+  skill_id          String
+  proficiency_level String?         @db.VarChar(20)
+  date_added        DateTime        @default(now()) @db.Timestamp(6)
+  skill             skill           @relation(fields: [skill_id], references: [skill_id], onDelete: NoAction, onUpdate: NoAction)
+  student_profile   student_profile @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([student_id, skill_id])
+  @@index([skill_id], map: "idx_student_skill_skill")
+}
+
+model subscription_feature {
+  feature_id        String            @id
+  plan_id           String
+  feature_key       String            @db.VarChar(100)
+  feature_name      String            @db.VarChar(200)
+  is_enabled        Boolean           @default(true)
+  subscription_plan subscription_plan @relation(fields: [plan_id], references: [plan_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([feature_key], map: "idx_sub_feature_key")
+  @@index([plan_id], map: "idx_sub_feature_plan")
+}
+
+model subscription_plan {
+  plan_id                 String                    @id
+  plan_name               String                    @db.VarChar(50)
+  plan_type               String                    @db.VarChar(20)
+  price_monthly           Decimal                   @default(0.00) @db.Decimal(10, 2)
+  price_annual            Decimal?                  @db.Decimal(10, 2)
+  max_students            Int?
+  max_job_posts           Int?
+  max_coordinators        Int?                      @default(1)
+  description             String?
+  is_active               Boolean                   @default(true)
+  date_created            DateTime                  @default(now()) @db.Timestamp(6)
+  max_applications        Int?
+  max_resume_versions     Int?
+  employer_subscription   employer_subscription[]
+  subscription_feature    subscription_feature[]
+  university_subscription university_subscription[]
+
+  @@index([is_active], map: "idx_subscription_plan_active")
+  @@index([plan_type], map: "idx_subscription_plan_type")
+}
+
+model university_analytics_snapshot {
+  snapshot_id          String             @id
+  university_id        String
+  snapshot_date        DateTime           @db.Date
+  total_students       Int                @default(0)
+  total_applications   Int                @default(0)
+  total_placements     Int                @default(0)
+  total_hired          Int                @default(0)
+  avg_placement_rating Decimal?           @db.Decimal(3, 2)
+  top_categories       String?
+  date_created         DateTime           @default(now()) @db.Timestamp(6)
+  university_profile   university_profile @relation(fields: [university_id], references: [university_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([university_id, snapshot_date], map: "idx_analytics_univ_date")
+  @@index([snapshot_date], map: "idx_analytics_date")
+  @@index([university_id], map: "idx_analytics_univ")
+}
+
+model university_coordinator {
+  coordinator_id     String             @id
+  university_id      String
+  user_id            String
+  name               String             @db.VarChar(200)
+  email              String
+  department         String?            @db.VarChar(200)
+  role               String             @default("coordinator") @db.VarChar(50)
+  is_active          Boolean            @default(true)
+  date_created       DateTime           @default(now()) @db.Timestamp(6)
+  university_profile university_profile @relation(fields: [university_id], references: [university_id], onDelete: NoAction, onUpdate: NoAction)
+  user_access        user_access        @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([university_id], map: "idx_coord_univ")
+  @@index([user_id], map: "idx_coord_user")
+}
+
+model university_course {
+  course_id             String                @id
+  department_id         String
+  course_name           String                @db.VarChar(200)
+  course_code           String?               @db.VarChar(20)
+  level                 String?               @db.VarChar(50)
+  date_created          DateTime              @default(now()) @db.Timestamp(6)
+  university_department university_department @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([department_id], map: "idx_course_dept")
+}
+
+model university_department {
+  department_id      String              @id
+  university_id      String
+  department_name    String              @db.VarChar(200)
+  date_created       DateTime            @default(now()) @db.Timestamp(6)
+  university_course  university_course[]
+  university_profile university_profile  @relation(fields: [university_id], references: [university_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([university_id, department_name], map: "idx_dept_univ_name")
+  @@index([university_id], map: "idx_dept_univ")
+}
+
+model university_subscription {
+  subscription_id      String             @id
+  university_id        String
+  plan_id              String
+  billing_cycle        String             @default("monthly") @db.VarChar(20)
+  status               String             @default("active") @db.VarChar(20)
+  trial_ends_at        DateTime?          @db.Timestamp(6)
+  current_period_start DateTime           @db.Timestamp(6)
+  current_period_end   DateTime           @db.Timestamp(6)
+  date_created         DateTime           @default(now()) @db.Timestamp(6)
+  date_updated         DateTime?          @db.Timestamp(6)
+  billing_history      billing_history[]
+  subscription_plan    subscription_plan  @relation(fields: [plan_id], references: [plan_id], onDelete: NoAction, onUpdate: NoAction)
+  university_profile   university_profile @relation(fields: [university_id], references: [university_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([status], map: "idx_univ_sub_status")
+  @@index([university_id], map: "idx_univ_sub_university")
 }

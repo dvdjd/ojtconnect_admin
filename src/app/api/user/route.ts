@@ -22,14 +22,17 @@ export async function POST(request: Request) {
       where.is_verify = filters.is_verify;
     }
 
-    const users = await prisma.user_access.findMany({
-      where,
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      orderBy: { date_created: "desc" },
-    });
+    const [users, total] = await Promise.all([
+      prisma.user_access.findMany({
+        where,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: { date_created: "desc" },
+      }),
+      prisma.user_access.count({ where }),
+    ]);
 
-    return NextResponse.json({ data: users, status: "success" });
+    return NextResponse.json({ data: users, total, status: "success" });
   } catch (error) {
     console.error("Prisma error:", error);
     return NextResponse.json(
