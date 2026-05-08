@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { FileText, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,6 +16,7 @@ import { LogoutButton } from "@/components/atoms/logout-button";
 
 const navItems = [
   { title: "Users", url: "/dashboard", icon: Users },
+  { title: "Applications", url: "/applications", icon: FileText },
 ];
 
 export function AppSidebar() {
