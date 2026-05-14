@@ -1,13 +1,13 @@
-import UsersTable from "@/components/organisms/users-table";
+import { AnalyticsDashboard } from "@/components/organisms/analytics-dashboard";
 
 export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
-        <p className="text-sm text-muted-foreground">Manage and verify user accounts</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">Overview of platform activity</p>
       </div>
-      <UsersTable />
+      <AnalyticsDashboard />
     </div>
   );
 }
