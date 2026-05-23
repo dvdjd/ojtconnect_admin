@@ -1,0 +1,14 @@
+.git
+.gitignore
+node_modules
+.next
+.env
+.env.local
+.env.development
+.env.production
+.env.production.example
+Dockerfile
+docker-compose.yml
+.dockerignore
+Caddyfile
+*.md
