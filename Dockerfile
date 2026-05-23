@@ -14,6 +14,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
+# Dummy value so prisma generate can run at build time (no DB connection is made)
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 
 # prisma generate runs as part of "npm run build" (prisma generate && next build)
 RUN npm run build
