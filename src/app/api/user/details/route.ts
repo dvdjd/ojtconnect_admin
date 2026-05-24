@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { generateId } from "@/lib/utils/generate-id";
 
 export const runtime = "nodejs";
 
@@ -14,11 +15,38 @@ export async function PUT(request: Request) {
     let profile = null;
 
     if (type === "student") {
-      profile = await prisma.student_profile.update({ where: { user_id }, data });
+      const student_id = await generateId(prisma, "S");
+      profile = await prisma.student_profile.upsert({
+        where: { user_id },
+        update: data,
+        create: { student_id, user_id, ...data },
+      });
     } else if (type === "company") {
-      profile = await prisma.company_profile.update({ where: { user_id }, data });
+      const company_id = await generateId(prisma, "C");
+      profile = await prisma.company_profile.upsert({
+        where: { user_id },
+        update: data,
+        create: { company_id, user_id, name: "", ...data },
+      });
     } else if (type === "university") {
-      profile = await prisma.university_profile.update({ where: { user_id }, data });
+      const university_id = await generateId(prisma, "T");
+      profile = await prisma.university_profile.upsert({
+        where: { user_id },
+        update: data,
+        create: {
+          university_id,
+          user_id,
+          position: "",
+          address_line: "",
+          admin_name: "",
+          department: "",
+          university_name: "",
+          university_type: "",
+          country: "",
+          state: "",
+          ...data,
+        },
+      });
     }
 
     return NextResponse.json({ data: profile, status: "success" });

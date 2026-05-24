@@ -458,10 +458,8 @@ export function UserDetailsDialog({ user, open, onOpenChange }: UserDetailsDialo
   }, [open, user]);
 
   const handleEdit = () => {
-    if (profile) {
-      setForm(toForm(profile));
-      setSaveError(null);
-    }
+    setForm(profile ? toForm(profile) : {});
+    setSaveError(null);
     setEditing(true);
   };
 
@@ -539,7 +537,7 @@ export function UserDetailsDialog({ user, open, onOpenChange }: UserDetailsDialo
         </div>
 
         <DialogFooter>
-          {profile && !loading && !editing && (
+          {!loading && !editing && (
             <Button size="sm" variant="outline" onClick={handleEdit}>
               <Pencil className="h-3.5 w-3.5 mr-1" />
               Edit Profile
