@@ -5,7 +5,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { filters, page, pageSize } = body;
-    const where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = {
+      is_active: filters.is_active !== undefined ? filters.is_active : true,
+    };
 
     if (filters.email && filters.email.trim() !== "") {
       where.email = {
@@ -47,11 +49,13 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { user_id } = body;
 
+    const data: Record<string, unknown> = {};
+    if (body.is_verify !== undefined) data.is_verify = body.is_verify;
+    if (body.is_active !== undefined) data.is_active = body.is_active;
+
     const users = await prisma.user_access.update({
       where: { user_id },
-      data: {
-        is_verify: true,
-      },
+      data,
     });
 
     return NextResponse.json({ data: users, status: "success" });
@@ -69,15 +73,16 @@ export async function DELETE(request: Request) {
     const body = await request.json();
     const { user_id } = body;
 
-    const users = await prisma.user_access.delete({
-      where: { user_id }
+    const users = await prisma.user_access.update({
+      where: { user_id },
+      data: { is_active: false },
     });
 
     return NextResponse.json({ data: users, status: "success" });
   } catch (error) {
     console.error("Prisma error:", error);
     return NextResponse.json(
-      { error: "Failed to delete user" },
+      { error: "Failed to deactivate user" },
       { status: 500 }
     );
   }

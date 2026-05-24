@@ -8,6 +8,7 @@ interface IData {
   password: string;
   type: string;
   is_verify: boolean;
+  is_active: boolean;
 }
 
 interface IResponse {
@@ -21,6 +22,7 @@ interface Filters {
   email?: string;
   type?: string;
   is_verify?: boolean;
+  is_active?: boolean;
 }
 
 export function useUser(initialFilters: Filters = {}, pageSize = 10) {
@@ -55,10 +57,20 @@ export function useUser(initialFilters: Filters = {}, pageSize = 10) {
     [filters, page, pageSize]
   );
 
+  const createUser = useCallback(async (email: string, password: string, type: string) => {
+    const response = await api.post<IResponse>("/api/user/create", { email, password, type });
+    if (response.status === "success" && response.data) {
+      await fetchUsers(true);
+    } else {
+      throw new Error((response as { error?: string }).error ?? "Failed to create user");
+    }
+  }, [fetchUsers]);
+
   const verifyUser = useCallback(async (user_id: string) => {
     try {
       const response = await api.put<IResponse>("/api/user", {
         user_id,
+        is_verify: true,
       });
 
       if (response.status === "success") {
@@ -70,6 +82,21 @@ export function useUser(initialFilters: Filters = {}, pageSize = 10) {
       }
     } catch {
       setError("Failed to verify user");
+    }
+  }, []);
+
+  const activateUser = useCallback(async (user_id: string) => {
+    try {
+      const response = await api.put<IResponse>("/api/user", {
+        user_id,
+        is_active: true,
+      });
+
+      if (response.status === "success") {
+        setUsers((prev) => prev.filter((u) => u.user_id !== user_id));
+      }
+    } catch {
+      setError("Failed to activate user");
     }
   }, []);
 
@@ -119,7 +146,9 @@ export function useUser(initialFilters: Filters = {}, pageSize = 10) {
     nextPage,
     prevPage,
     goToPage,
+    createUser,
     verifyUser,
-    deleteUser
+    activateUser,
+    deleteUser,
   };
 }

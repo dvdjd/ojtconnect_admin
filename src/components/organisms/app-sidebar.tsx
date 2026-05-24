@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, LayoutDashboard, Users } from "lucide-react";
+import { FileText, LayoutDashboard, ShieldCheck, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +18,7 @@ const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Users", url: "/users", icon: Users },
   { title: "Applications", url: "/applications", icon: FileText },
+  { title: "Admins", url: "/admins", icon: ShieldCheck },
 ];
 
 export function AppSidebar() {

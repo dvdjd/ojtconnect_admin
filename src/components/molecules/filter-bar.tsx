@@ -22,22 +22,32 @@ const STATUS_LABELS: Record<string, string> = {
   false: "Pending",
 };
 
+const ACTIVE_LABELS: Record<string, string> = {
+  all: "All users",
+  true: "Active",
+  false: "Inactive",
+};
+
 interface FilterBarProps {
   email: string;
   type: string;
   isVerify: string;
+  isActive: string;
   onEmailChange: (v: string) => void;
   onTypeChange: (v: string) => void;
   onVerifyChange: (v: string) => void;
+  onActiveChange: (v: string) => void;
 }
 
 export function FilterBar({
   email,
   type,
   isVerify,
+  isActive,
   onEmailChange,
   onTypeChange,
   onVerifyChange,
+  onActiveChange,
 }: FilterBarProps) {
   return (
     <div className="flex flex-wrap gap-4">
@@ -77,6 +87,20 @@ export function FilterBar({
             <SelectItem value="all">All status</SelectItem>
             <SelectItem value="true">Verified</SelectItem>
             <SelectItem value="false">Pending</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label>Active</Label>
+        <Select value={isActive} onValueChange={(v) => onActiveChange(v ?? "all")}>
+          <SelectTrigger className="w-40">
+            <span className="text-sm">{ACTIVE_LABELS[isActive] ?? "All users"}</span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All users</SelectItem>
+            <SelectItem value="true">Active</SelectItem>
+            <SelectItem value="false">Inactive</SelectItem>
           </SelectContent>
         </Select>
       </div>
