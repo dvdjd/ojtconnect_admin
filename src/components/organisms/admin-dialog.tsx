@@ -41,7 +41,7 @@ interface AdminDialogProps {
 export function AdminDialog({ open, onOpenChange, admin, onSave }: AdminDialogProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("recruitment");
+  const [role, setRole] = useState<string>("recruitment");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -119,7 +119,7 @@ export function AdminDialog({ open, onOpenChange, admin, onSave }: AdminDialogPr
           </div>
           <div className="flex flex-col gap-1.5">
             <Label>Role</Label>
-            <Select value={role} onValueChange={setRole}>
+            <Select value={role} onValueChange={(v) => v && setRole(v)}>
               <SelectTrigger>
                 <span className="text-sm">{roleLabel}</span>
               </SelectTrigger>
