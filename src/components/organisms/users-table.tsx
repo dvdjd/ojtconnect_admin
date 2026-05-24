@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -62,6 +63,8 @@ export default function UsersTable() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [confirmUser, setConfirmUser] = useState<SelectedUser | null>(null);
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
+  const [hardDeleteUser2, setHardDeleteUser2] = useState<SelectedUser | null>(null);
+  const [hardDeleteInput, setHardDeleteInput] = useState("");
 
   const handleViewDetails = (user: SelectedUser) => {
     setSelectedUser(user);
@@ -69,8 +72,13 @@ export default function UsersTable() {
   };
 
   const openConfirm = (user: SelectedUser, action: ConfirmAction) => {
-    setConfirmUser(user);
-    setConfirmAction(action);
+    if (action === "hard_delete") {
+      setHardDeleteUser2(user);
+      setHardDeleteInput("");
+    } else {
+      setConfirmUser(user);
+      setConfirmAction(action);
+    }
   };
 
   const closeConfirm = () => {
@@ -78,16 +86,26 @@ export default function UsersTable() {
     setConfirmAction(null);
   };
 
+  const closeHardDelete = () => {
+    setHardDeleteUser2(null);
+    setHardDeleteInput("");
+  };
+
   const handleConfirm = async () => {
     if (!confirmUser || !confirmAction) return;
     if (confirmAction === "verify") await verifyUser(confirmUser.user_id);
     if (confirmAction === "deactivate") await deleteUser(confirmUser.user_id);
     if (confirmAction === "activate") await activateUser(confirmUser.user_id);
-    if (confirmAction === "hard_delete") await hardDeleteUser(confirmUser.user_id);
     closeConfirm();
   };
 
-  const confirmMeta: Record<ConfirmAction, { title: string; description: (email: string) => React.ReactNode; label: string; destructive?: boolean }> = {
+  const handleHardDelete = async () => {
+    if (!hardDeleteUser2 || hardDeleteInput !== hardDeleteUser2.email) return;
+    await hardDeleteUser(hardDeleteUser2.user_id);
+    closeHardDelete();
+  };
+
+  const confirmMeta: Record<Exclude<ConfirmAction, "hard_delete">, { title: string; description: (email: string) => React.ReactNode; label: string; destructive?: boolean }> = {
     verify: {
       title: "Approve User",
       description: (email) => <>Are you sure you want to approve <span className="font-semibold text-foreground">{email}</span>?{" "}They will be able to fully access the platform.</>,
@@ -104,15 +122,9 @@ export default function UsersTable() {
       description: (email) => <>Are you sure you want to reactivate <span className="font-semibold text-foreground">{email}</span>?{" "}They will regain access to the platform.</>,
       label: "Activate",
     },
-    hard_delete: {
-      title: "Permanently Delete User",
-      description: (email) => <>Are you sure you want to permanently delete <span className="font-semibold text-foreground">{email}</span>?{" "}This cannot be undone and all their data will be lost.</>,
-      label: "Delete Permanently",
-      destructive: true,
-    },
   };
 
-  const meta = confirmAction ? confirmMeta[confirmAction] : null;
+  const meta = confirmAction && confirmAction !== "hard_delete" ? confirmMeta[confirmAction as Exclude<ConfirmAction, "hard_delete">] : null;
 
   return (
     <>
@@ -275,6 +287,41 @@ export default function UsersTable() {
               onClick={handleConfirm}
             >
               {meta?.label}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!hardDeleteUser2} onOpenChange={(open) => !open && closeHardDelete()}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Permanently Delete User</DialogTitle>
+            <DialogDescription>
+              This action is <span className="font-semibold text-foreground">irreversible</span>. The user and all associated data will be permanently removed.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-1">
+            <p className="text-sm text-muted-foreground">
+              Type <span className="font-mono font-semibold text-foreground">{hardDeleteUser2?.email}</span> to confirm.
+            </p>
+            <Input
+              placeholder="Enter email to confirm"
+              value={hardDeleteInput}
+              onChange={(e) => setHardDeleteInput(e.target.value)}
+              onPaste={(e) => e.preventDefault()}
+              autoComplete="off"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeHardDelete}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-destructive text-white hover:bg-red-700"
+              disabled={hardDeleteInput !== hardDeleteUser2?.email}
+              onClick={handleHardDelete}
+            >
+              Delete Permanently
             </Button>
           </DialogFooter>
         </DialogContent>
