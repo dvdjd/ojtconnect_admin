@@ -120,7 +120,7 @@ export function CreateUserDialog({ open, onOpenChange, onSave }: CreateUserDialo
           </div>
           <div className="flex flex-col gap-1.5">
             <Label>User Type</Label>
-            <Select value={type} onValueChange={setType}>
+            <Select value={type} onValueChange={(v) => v && setType(v)}>
               <SelectTrigger>
                 <span className="text-sm">{typeLabel}</span>
               </SelectTrigger>
