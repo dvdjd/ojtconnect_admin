@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { generateId } from "@/lib/utils/generate-id";
 
@@ -18,9 +19,10 @@ export async function POST(request: Request) {
     }
 
     const user_id = await generateId(prisma, "U");
+    const hashed = await bcrypt.hash(password, 10);
 
     await prisma.user_access.create({
-      data: { user_id, email, password, type, is_verify: true, is_active: true },
+      data: { user_id, email, password: hashed, type, is_verify: true, is_active: true },
     });
 
     if (type === "student") {
