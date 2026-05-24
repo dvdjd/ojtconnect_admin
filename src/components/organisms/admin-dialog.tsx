@@ -19,17 +19,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { IAdmin } from "@/core/hooks/useAdmin";
+import { api } from "@/lib/utils/api";
+
+interface AdminRole {
+  id: number;
+  name: string;
+  slug: string;
+}
 
 function generatePassword() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
   return Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
 }
-
-export const ADMIN_ROLES = [
-  { value: "super_admin", label: "Super Admin" },
-  { value: "marketing", label: "Marketing" },
-  { value: "recruitment", label: "Recruitment" },
-];
 
 interface AdminDialogProps {
   open: boolean;
@@ -41,18 +42,29 @@ interface AdminDialogProps {
 export function AdminDialog({ open, onOpenChange, admin, onSave }: AdminDialogProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<string>("recruitment");
+  const [role, setRole] = useState<string>("");
+  const [roles, setRoles] = useState<AdminRole[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    api.get<{ data: AdminRole[]; status: string }>("/api/roles").then((res) => {
+      if (res.status === "success" && res.data) {
+        setRoles(res.data);
+        if (!role) setRole(res.data[0]?.slug ?? "");
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (open) {
       setUsername(admin?.username ?? "");
       setPassword("");
-      setRole(admin?.role ?? "recruitment");
+      setRole(admin?.role ?? roles[0]?.slug ?? "");
       setError(null);
     }
-  }, [open, admin]);
+  }, [open, admin, roles]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +82,7 @@ export function AdminDialog({ open, onOpenChange, admin, onSave }: AdminDialogPr
     }
   };
 
-  const roleLabel = ADMIN_ROLES.find((r) => r.value === role)?.label ?? "Select role";
+  const roleLabel = roles.find((r) => r.slug === role)?.name ?? "Select role";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -124,9 +136,9 @@ export function AdminDialog({ open, onOpenChange, admin, onSave }: AdminDialogPr
                 <span className="text-sm">{roleLabel}</span>
               </SelectTrigger>
               <SelectContent>
-                {ADMIN_ROLES.map((r) => (
-                  <SelectItem key={r.value} value={r.value}>
-                    {r.label}
+                {roles.map((r) => (
+                  <SelectItem key={r.slug} value={r.slug}>
+                    {r.name}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const token = await new SignJWT({ id: user.id, username: user.username })
+    const token = await new SignJWT({ id: user.id, username: user.username, role: user.role })
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("7d")
       .sign(SECRET);

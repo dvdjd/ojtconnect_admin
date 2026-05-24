@@ -1,5 +1,15 @@
 import Link from "next/link";
-import { FileText, LayoutDashboard, ShieldCheck, Users } from "lucide-react";
+import {
+  Activity, BarChart, BarChart2, BarChart3, Bell, BookOpen,
+  Briefcase, Building, Building2, Calendar, ChartBar, CheckCircle,
+  CircleUser, ClipboardList, Clock, Code, Cog, CreditCard,
+  Database, FileText, Flag, FolderOpen, Globe, GraduationCap,
+  Grid, HelpCircle, Home, Inbox, Key, LayoutDashboard,
+  LineChart, List, Lock, LogIn, Mail, Map, MessageSquare,
+  Monitor, Package, PieChart, Search, Settings, Settings2,
+  ShieldCheck, Star, Tag, Terminal, Truck, User, UserCheck,
+  UserCog, Users, Video, Wallet, Zap, Circle, LucideIcon,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -14,14 +24,37 @@ import {
 } from "@/components/ui/sidebar";
 import { LogoutButton } from "@/components/atoms/logout-button";
 
-const navItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Users", url: "/users", icon: Users },
-  { title: "Applications", url: "/applications", icon: FileText },
-  { title: "Admins", url: "/admins", icon: ShieldCheck },
-];
+const ICON_MAP: Record<string, LucideIcon> = {
+  Activity, BarChart, BarChart2, BarChart3, Bell, BookOpen,
+  Briefcase, Building, Building2, Calendar, ChartBar, CheckCircle,
+  CircleUser, ClipboardList, Clock, Code, Cog, CreditCard,
+  Database, FileText, Flag, FolderOpen, Globe, GraduationCap,
+  Grid, HelpCircle, Home, Inbox, Key, LayoutDashboard,
+  LineChart, List, Lock, LogIn, Mail, Map, MessageSquare,
+  Monitor, Package, PieChart, Search, Settings, Settings2,
+  ShieldCheck, Star, Tag, Terminal, Truck, User, UserCheck,
+  UserCog, Users, Video, Wallet, Zap, Circle,
+};
 
-export function AppSidebar() {
+interface NavRoute {
+  id: number;
+  label: string;
+  route: string;
+  icon: string;
+  sort_order: number;
+}
+
+interface AppSidebarProps {
+  role?: string | null;
+  navRoutes?: NavRoute[];
+  allowedRoutes?: string[];
+}
+
+export function AppSidebar({ role, navRoutes = [], allowedRoutes = [] }: AppSidebarProps) {
+  const navItems = navRoutes.filter(
+    (item) => !role || allowedRoutes.includes(item.route)
+  );
+
   return (
     <Sidebar>
       <SidebarHeader className="px-4 py-5">
@@ -36,14 +69,17 @@ export function AppSidebar() {
           <SidebarGroupLabel>Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton render={<Link href={item.url} />}>
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navItems.map((item) => {
+                const Icon = ICON_MAP[item.icon] ?? Circle;
+                return (
+                  <SidebarMenuItem key={item.route}>
+                    <SidebarMenuButton render={<Link href={item.route} />}>
+                      <Icon className="h-4 w-4" />
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

@@ -5,6 +5,7 @@ const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 interface MyJWT extends JWTPayload {
   id: number;
   username: string;
+  role?: string | null;
 }
 
 export async function createJWT(payload: MyJWT) {

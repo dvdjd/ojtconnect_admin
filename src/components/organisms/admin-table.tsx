@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useAdmin, IAdmin } from "@/core/hooks/useAdmin";
-import { AdminDialog, ADMIN_ROLES } from "@/components/organisms/admin-dialog";
+import { AdminDialog } from "@/components/organisms/admin-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -30,7 +30,7 @@ function RoleBadge({ role }: { role: string | null }) {
     marketing: "bg-blue-100 text-blue-700",
     recruitment: "bg-green-100 text-green-700",
   };
-  const label = ADMIN_ROLES.find((r) => r.value === role)?.label ?? role ?? "—";
+  const label = role ? role.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "—";
   const color = role ? (colors[role] ?? "bg-muted text-muted-foreground") : "";
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${color}`}>
