@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckCircle, Eye, Plus, UserCheck, UserX } from "lucide-react";
+import { CheckCircle, Eye, Plus, Trash2, UserCheck, UserX } from "lucide-react";
 import { useUser } from "@/core/hooks/useUser";
 import { StatusBadge } from "@/components/atoms/status-badge";
 import { FilterBar } from "@/components/molecules/filter-bar";
@@ -36,7 +36,7 @@ interface SelectedUser {
   is_active: boolean;
 }
 
-type ConfirmAction = "verify" | "deactivate" | "activate";
+type ConfirmAction = "verify" | "deactivate" | "activate" | "hard_delete";
 
 export default function UsersTable() {
   const {
@@ -54,6 +54,7 @@ export default function UsersTable() {
     verifyUser,
     activateUser,
     deleteUser,
+    hardDeleteUser,
   } = useUser();
 
   const [selectedUser, setSelectedUser] = useState<SelectedUser | null>(null);
@@ -82,6 +83,7 @@ export default function UsersTable() {
     if (confirmAction === "verify") await verifyUser(confirmUser.user_id);
     if (confirmAction === "deactivate") await deleteUser(confirmUser.user_id);
     if (confirmAction === "activate") await activateUser(confirmUser.user_id);
+    if (confirmAction === "hard_delete") await hardDeleteUser(confirmUser.user_id);
     closeConfirm();
   };
 
@@ -101,6 +103,12 @@ export default function UsersTable() {
       title: "Activate User",
       description: (email) => <>Are you sure you want to reactivate <span className="font-semibold text-foreground">{email}</span>?{" "}They will regain access to the platform.</>,
       label: "Activate",
+    },
+    hard_delete: {
+      title: "Permanently Delete User",
+      description: (email) => <>Are you sure you want to permanently delete <span className="font-semibold text-foreground">{email}</span>?{" "}This cannot be undone and all their data will be lost.</>,
+      label: "Delete Permanently",
+      destructive: true,
     },
   };
 
@@ -206,6 +214,15 @@ export default function UsersTable() {
                               <UserCheck className="h-4 w-4" />
                             </Button>
                           )}
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 text-destructive border-destructive/40 hover:bg-destructive hover:text-white hover:border-destructive"
+                            onClick={() => openConfirm(user, "hard_delete")}
+                            title="Permanently delete user"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>

@@ -102,9 +102,20 @@ export function useUser(initialFilters: Filters = {}, pageSize = 10) {
 
   const deleteUser = useCallback(async (user_id: string) => {
     try {
-      const response = await api.delete<IResponse>(`/api/user`, {
-        user_id,
-      });
+      const response = await api.delete<IResponse>(`/api/user`, { user_id });
+      if (response.status === "success") {
+        setUsers((prev) => prev.filter((u) => u.user_id !== user_id));
+      } else {
+        setError(response.message);
+      }
+    } catch {
+      setError("Failed to delete user");
+    }
+  }, []);
+
+  const hardDeleteUser = useCallback(async (user_id: string) => {
+    try {
+      const response = await api.delete<IResponse>(`/api/user/hard-delete`, { user_id });
       if (response.status === "success") {
         setUsers((prev) => prev.filter((u) => u.user_id !== user_id));
       } else {
@@ -150,5 +161,6 @@ export function useUser(initialFilters: Filters = {}, pageSize = 10) {
     verifyUser,
     activateUser,
     deleteUser,
+    hardDeleteUser,
   };
 }
