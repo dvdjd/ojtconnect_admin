@@ -127,7 +127,7 @@ export function ApplicationDetailsDialog({
               <div className="space-y-1.5">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Resume</p>
                 <a
-                  href={app.resume}
+                  href={`/api/download?file=${encodeURIComponent(app.resume)}&name=${encodeURIComponent(studentName)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-blue-600 hover:underline break-all"
