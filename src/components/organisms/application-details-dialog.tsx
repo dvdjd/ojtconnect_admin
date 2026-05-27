@@ -132,7 +132,7 @@ export function ApplicationDetailsDialog({
                   rel="noopener noreferrer"
                   className="text-sm text-blue-600 hover:underline break-all"
                 >
-                  View Resume
+                  Download Resume
                 </a>
               </div>
             </>
