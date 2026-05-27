@@ -22,9 +22,7 @@ export async function GET(request: NextRequest) {
   const upstream = `${mainAppUrl}/download?${params.toString()}`;
 
   try {
-    console.log("[download] fetching:", upstream);
     const response = await fetch(upstream);
-    console.log("[download] upstream status:", response.status);
 
     if (!response.ok) {
       return new NextResponse("File not found", { status: 404 });
