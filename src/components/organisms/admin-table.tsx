@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { useAdmin, IAdmin } from "@/core/hooks/useAdmin";
 import { AdminDialog } from "@/components/organisms/admin-dialog";
 import { Button } from "@/components/ui/button";
@@ -58,8 +59,10 @@ export default function AdminTable() {
   const handleSave = async (username: string, password: string, role: string) => {
     if (selectedAdmin) {
       await updateAdmin(selectedAdmin.id, username, role, password || undefined);
+      toast.success("Admin updated successfully.");
     } else {
       await createAdmin(username, password, role);
+      toast.success("Admin created successfully.");
     }
   };
 
@@ -167,7 +170,12 @@ export default function AdminTable() {
               variant="destructive"
               onClick={async () => {
                 if (confirmAdmin) {
-                  await deleteAdmin(confirmAdmin.id);
+                  try {
+                    await deleteAdmin(confirmAdmin.id);
+                    toast.success("Admin deleted successfully.");
+                  } catch {
+                    toast.error("Failed to delete admin.");
+                  }
                   setConfirmAdmin(null);
                 }
               }}

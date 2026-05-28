@@ -67,62 +67,46 @@ export function useUser(initialFilters: Filters = {}, pageSize = 10) {
   }, [fetchUsers]);
 
   const verifyUser = useCallback(async (user_id: string) => {
-    try {
-      const response = await api.put<IResponse>("/api/user", {
-        user_id,
-        is_verify: true,
-      });
-
-      if (response.status === "success") {
-        setUsers((prev) =>
-          prev.map((u) =>
-            u.user_id === user_id ? { ...u, is_verify: true } : u
-          )
-        );
-      }
-    } catch {
-      setError("Failed to verify user");
+    const response = await api.put<IResponse>("/api/user", {
+      user_id,
+      is_verify: true,
+    });
+    if (response.status === "success") {
+      setUsers((prev) =>
+        prev.map((u) => (u.user_id === user_id ? { ...u, is_verify: true } : u))
+      );
+    } else {
+      throw new Error((response as { error?: string }).error ?? "Failed to verify user");
     }
   }, []);
 
   const activateUser = useCallback(async (user_id: string) => {
-    try {
-      const response = await api.put<IResponse>("/api/user", {
-        user_id,
-        is_active: true,
-      });
-
-      if (response.status === "success") {
-        setUsers((prev) => prev.filter((u) => u.user_id !== user_id));
-      }
-    } catch {
-      setError("Failed to activate user");
+    const response = await api.put<IResponse>("/api/user", {
+      user_id,
+      is_active: true,
+    });
+    if (response.status === "success") {
+      setUsers((prev) => prev.filter((u) => u.user_id !== user_id));
+    } else {
+      throw new Error((response as { error?: string }).error ?? "Failed to activate user");
     }
   }, []);
 
   const deleteUser = useCallback(async (user_id: string) => {
-    try {
-      const response = await api.delete<IResponse>(`/api/user`, { user_id });
-      if (response.status === "success") {
-        setUsers((prev) => prev.filter((u) => u.user_id !== user_id));
-      } else {
-        setError(response.message);
-      }
-    } catch {
-      setError("Failed to delete user");
+    const response = await api.delete<IResponse>(`/api/user`, { user_id });
+    if (response.status === "success") {
+      setUsers((prev) => prev.filter((u) => u.user_id !== user_id));
+    } else {
+      throw new Error((response as { error?: string }).error ?? "Failed to deactivate user");
     }
   }, []);
 
   const hardDeleteUser = useCallback(async (user_id: string) => {
-    try {
-      const response = await api.delete<IResponse>(`/api/user/hard-delete`, { user_id });
-      if (response.status === "success") {
-        setUsers((prev) => prev.filter((u) => u.user_id !== user_id));
-      } else {
-        setError(response.message);
-      }
-    } catch {
-      setError("Failed to delete user");
+    const response = await api.delete<IResponse>(`/api/user/hard-delete`, { user_id });
+    if (response.status === "success") {
+      setUsers((prev) => prev.filter((u) => u.user_id !== user_id));
+    } else {
+      throw new Error((response as { error?: string }).error ?? "Failed to delete user");
     }
   }, []);
 

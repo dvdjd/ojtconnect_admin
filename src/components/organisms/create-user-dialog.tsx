@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,9 +65,12 @@ export function CreateUserDialog({ open, onOpenChange, onSave }: CreateUserDialo
     setError(null);
     try {
       await onSave(email.trim(), password, type);
+      toast.success("User created successfully.");
       handleOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create user.");
+      const msg = err instanceof Error ? err.message : "Failed to create user.";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }

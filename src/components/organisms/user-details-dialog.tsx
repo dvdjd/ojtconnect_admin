@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Pencil, X, Check } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -481,11 +482,14 @@ export function UserDetailsDialog({ user, open, onOpenChange }: UserDetailsDialo
       if (json.status === "success") {
         setProfile(json.data);
         setEditing(false);
+        toast.success("Profile updated successfully.");
       } else {
         setSaveError("Failed to save changes.");
+        toast.error("Failed to save changes.");
       }
     } catch {
       setSaveError("Failed to save changes.");
+      toast.error("Failed to save changes.");
     } finally {
       setSaving(false);
     }

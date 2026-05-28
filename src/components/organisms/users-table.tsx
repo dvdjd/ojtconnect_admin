@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { CheckCircle, Eye, Plus, Trash2, UserCheck, UserX } from "lucide-react";
+import { toast } from "sonner";
 import { useUser } from "@/core/hooks/useUser";
 import { StatusBadge } from "@/components/atoms/status-badge";
 import { FilterBar } from "@/components/molecules/filter-bar";
@@ -93,15 +94,30 @@ export default function UsersTable() {
 
   const handleConfirm = async () => {
     if (!confirmUser || !confirmAction) return;
-    if (confirmAction === "verify") await verifyUser(confirmUser.user_id);
-    if (confirmAction === "deactivate") await deleteUser(confirmUser.user_id);
-    if (confirmAction === "activate") await activateUser(confirmUser.user_id);
+    const successMessages: Record<Exclude<ConfirmAction, "hard_delete">, string> = {
+      verify: "User approved successfully.",
+      deactivate: "User deactivated successfully.",
+      activate: "User activated successfully.",
+    };
+    try {
+      if (confirmAction === "verify") await verifyUser(confirmUser.user_id);
+      if (confirmAction === "deactivate") await deleteUser(confirmUser.user_id);
+      if (confirmAction === "activate") await activateUser(confirmUser.user_id);
+      toast.success(successMessages[confirmAction as Exclude<ConfirmAction, "hard_delete">]);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Action failed.");
+    }
     closeConfirm();
   };
 
   const handleHardDelete = async () => {
     if (!hardDeleteUser2 || hardDeleteInput !== hardDeleteUser2.email) return;
-    await hardDeleteUser(hardDeleteUser2.user_id);
+    try {
+      await hardDeleteUser(hardDeleteUser2.user_id);
+      toast.success("User permanently deleted.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete user.");
+    }
     closeHardDelete();
   };
 

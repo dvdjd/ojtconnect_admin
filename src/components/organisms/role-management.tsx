@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { api } from "@/lib/utils/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,9 +43,12 @@ export default function RoleManagement() {
       if (res.status === "success" && res.data) {
         setRoles((prev) => [...prev, res.data]);
         setNewName("");
+        toast.success("Role added successfully.");
       }
     } catch {
-      setError("Failed to add role. Slug may already exist.");
+      const msg = "Failed to add role. Slug may already exist.";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setAdding(false);
     }
@@ -54,8 +58,9 @@ export default function RoleManagement() {
     try {
       await api.delete("/api/roles", { id });
       setRoles((prev) => prev.filter((r) => r.id !== id));
+      toast.success("Role deleted.");
     } catch {
-      setError("Failed to delete role.");
+      toast.error("Failed to delete role.");
     }
   };
 

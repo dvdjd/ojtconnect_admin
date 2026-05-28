@@ -4,6 +4,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator";
 import { verifyJWT } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
+import { Toaster } from "sonner";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
@@ -29,6 +30,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </header>
         <main className="flex-1 p-6">{children}</main>
       </SidebarInset>
+      <Toaster richColors position="top-right" />
     </SidebarProvider>
   );
 }

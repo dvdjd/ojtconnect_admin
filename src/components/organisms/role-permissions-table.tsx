@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { api } from "@/lib/utils/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,12 +64,16 @@ export default function RolePermissionsTable() {
       if (allowed) {
         await api.delete("/api/roles/permissions", { role_slug, route });
         setPermissions((prev) => prev.filter((p) => !(p.role_slug === role_slug && p.route === route)));
+        toast.success("Permission removed.");
       } else {
         const res = await api.post<{ data: Permission; status: string }>("/api/roles/permissions", { role_slug, route });
-        if (res.status === "success" && res.data) setPermissions((prev) => [...prev, res.data]);
+        if (res.status === "success" && res.data) {
+          setPermissions((prev) => [...prev, res.data]);
+          toast.success("Permission granted.");
+        }
       }
     } catch {
-      setError("Failed to update permission.");
+      toast.error("Failed to update permission.");
     }
   };
 
@@ -87,9 +92,10 @@ export default function RolePermissionsTable() {
         setNewLabel("");
         setNewRoute("");
         setNewIcon("");
+        toast.success("Route added successfully.");
       }
     } catch {
-      setError("Failed to add route.");
+      toast.error("Failed to add route.");
     } finally {
       setAdding(false);
     }
@@ -99,8 +105,9 @@ export default function RolePermissionsTable() {
     try {
       await api.delete("/api/nav-routes", { id });
       setNavRoutes((prev) => prev.filter((r) => r.id !== id));
+      toast.success("Route deleted.");
     } catch {
-      setError("Failed to delete route.");
+      toast.error("Failed to delete route.");
     }
   };
 

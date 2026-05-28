@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -75,8 +76,10 @@ export function AdminDialog({ open, onOpenChange, admin, onSave }: AdminDialogPr
     try {
       await onSave(username.trim(), password, role);
       onOpenChange(false);
-    } catch {
-      setError("Failed to save. Please try again.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to save. Please try again.";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
