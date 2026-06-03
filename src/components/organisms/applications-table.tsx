@@ -29,15 +29,17 @@ import {
 const STATUS_VARIANTS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "secondary",
   accepted: "default",
-  rejected: "destructive",
+  "for interview": "default",
+  "Not Selected": "destructive",
   withdrawn: "outline",
 };
 
 const STATUS_LABELS: Record<string, string> = {
   all: "All status",
   pending: "Pending",
+  "for interview": "For Interview",
   accepted: "Accepted",
-  rejected: "Rejected",
+  "Not Selected": "Not Selected",
   withdrawn: "Withdrawn",
 };
 
@@ -93,8 +95,9 @@ export default function ApplicationsTable() {
                 <SelectContent>
                   <SelectItem value="all">All status</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="for interview">For Interview</SelectItem>
                   <SelectItem value="accepted">Accepted</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value="Not Selected">Not Selected</SelectItem>
                   <SelectItem value="withdrawn">Withdrawn</SelectItem>
                 </SelectContent>
               </Select>
@@ -151,8 +154,8 @@ export default function ApplicationsTable() {
                         <TableCell className="text-muted-foreground">{app.job_post.position ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{app.job_post.company_profile.name}</TableCell>
                         <TableCell>
-                          <Badge variant={STATUS_VARIANTS[app.status] ?? "secondary"} className="capitalize">
-                            {app.status}
+                          <Badge variant={STATUS_VARIANTS[app.status] ?? "secondary"}>
+                            {STATUS_LABELS[app.status] ?? app.status}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground text-sm">{date}</TableCell>

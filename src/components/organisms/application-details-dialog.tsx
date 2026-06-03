@@ -13,8 +13,17 @@ import type { ApplicationData } from "@/core/hooks/useApplications";
 const STATUS_VARIANTS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "secondary",
   accepted: "default",
-  rejected: "destructive",
+  "for interview": "default",
+  "Not Selected": "destructive",
   withdrawn: "outline",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Pending",
+  "for interview": "For Interview",
+  accepted: "Accepted",
+  "Not Selected": "Not Selected",
+  withdrawn: "Withdrawn",
 };
 
 function Field({ label, value }: { label: string; value?: string | null }) {
@@ -76,8 +85,8 @@ export function ApplicationDetailsDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 flex-wrap">
             Application Details
-            <Badge variant={STATUS_VARIANTS[app.status] ?? "secondary"} className="capitalize text-xs font-normal">
-              {app.status}
+            <Badge variant={STATUS_VARIANTS[app.status] ?? "secondary"} className="text-xs font-normal">
+              {STATUS_LABELS[app.status] ?? app.status}
             </Badge>
           </DialogTitle>
           <p className="text-sm text-muted-foreground">Applied on {appliedDate}</p>

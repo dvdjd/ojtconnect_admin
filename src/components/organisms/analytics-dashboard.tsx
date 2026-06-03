@@ -3,7 +3,23 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, Building2, GraduationCap, FileText, Briefcase, CheckCircle, Clock } from "lucide-react";
+import {
+  Users,
+  Building2,
+  GraduationCap,
+  FileText,
+  Briefcase,
+  CheckCircle,
+  Clock,
+  CalendarClock,
+  UserPlus,
+  XCircle,
+} from "lucide-react";
+
+interface RankedItem {
+  name: string;
+  count: number;
+}
 
 interface AnalyticsData {
   users: {
@@ -19,10 +35,18 @@ interface AnalyticsData {
     pending: number;
     accepted: number;
     rejected: number;
+    interview: number;
+  };
+  signups: {
+    last7d: number;
+    last30d: number;
   };
   jobs: {
     total: number;
   };
+  topCompaniesByJobs: RankedItem[];
+  topCompaniesByApplicants: RankedItem[];
+  applicantsPerCompany: RankedItem[];
 }
 
 function StatCard({
@@ -44,9 +68,7 @@ function StatCard({
       </CardHeader>
       <CardContent>
         <p className="text-2xl font-bold">{value.toLocaleString()}</p>
-        {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
-        )}
+        {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
       </CardContent>
     </Card>
   );
@@ -62,6 +84,52 @@ function StatCardSkeleton() {
       <CardContent>
         <Skeleton className="h-8 w-16 mb-1" />
         <Skeleton className="h-3 w-32" />
+      </CardContent>
+    </Card>
+  );
+}
+
+function RankedList({
+  title,
+  items,
+  label,
+  loading,
+  skeletonCount = 3,
+}: {
+  title: string;
+  items: RankedItem[];
+  label: string;
+  loading: boolean;
+  skeletonCount?: number;
+}) {
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {loading ? (
+          Array.from({ length: skeletonCount }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-4 w-8" />
+            </div>
+          ))
+        ) : items.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No data available.</p>
+        ) : (
+          items.map((item, i) => (
+            <div key={i} className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-xs font-medium text-muted-foreground w-5 shrink-0">{i + 1}.</span>
+                <span className="text-sm truncate">{item.name}</span>
+              </div>
+              <span className="text-sm font-semibold shrink-0">
+                {item.count.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">{label}</span>
+              </span>
+            </div>
+          ))
+        )}
       </CardContent>
     </Card>
   );
@@ -86,17 +154,15 @@ export function AnalyticsDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (error) {
-    return (
-      <p className="text-sm text-destructive">{error}</p>
-    );
-  }
+  if (error) return <p className="text-sm text-destructive">{error}</p>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+
+      {/* Users */}
       <div>
-        <h2 className="text-lg font-semibold">Users</h2>
-        <div className="grid grid-cols-2 gap-4 mt-3 sm:grid-cols-3 lg:grid-cols-5">
+        <h2 className="text-lg font-semibold mb-3">Users</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {loading ? (
             Array.from({ length: 5 }).map((_, i) => <StatCardSkeleton key={i} />)
           ) : (
@@ -116,32 +182,77 @@ export function AnalyticsDashboard() {
         </div>
       </div>
 
+      {/* Sign-ups */}
       <div>
-        <h2 className="text-lg font-semibold">Applications</h2>
-        <div className="grid grid-cols-2 gap-4 mt-3 sm:grid-cols-4">
+        <h2 className="text-lg font-semibold mb-3">Student Sign-ups</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-2 max-w-sm">
           {loading ? (
-            Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+            Array.from({ length: 2 }).map((_, i) => <StatCardSkeleton key={i} />)
           ) : (
             <>
-              <StatCard title="Total Applications" value={data!.applications.total} icon={FileText} />
-              <StatCard title="Pending" value={data!.applications.pending} icon={Clock} />
-              <StatCard title="Accepted" value={data!.applications.accepted} icon={CheckCircle} />
-              <StatCard title="Rejected" value={data!.applications.rejected} icon={FileText} />
+              <StatCard title="Last 7 Days" value={data!.signups.last7d} icon={UserPlus} />
+              <StatCard title="Last 30 Days" value={data!.signups.last30d} icon={UserPlus} />
             </>
           )}
         </div>
       </div>
 
+      {/* Applications */}
       <div>
-        <h2 className="text-lg font-semibold">Jobs</h2>
-        <div className="grid grid-cols-2 gap-4 mt-3 sm:grid-cols-4">
+        <h2 className="text-lg font-semibold mb-3">Applications</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {loading ? (
-            <StatCardSkeleton />
+            Array.from({ length: 5 }).map((_, i) => <StatCardSkeleton key={i} />)
           ) : (
+            <>
+              <StatCard title="Total" value={data!.applications.total} icon={FileText} />
+              <StatCard title="Pending" value={data!.applications.pending} icon={Clock} />
+              <StatCard title="Accepted" value={data!.applications.accepted} icon={CheckCircle} />
+              <StatCard title="Not Selected" value={data!.applications.rejected} icon={XCircle} />
+              <StatCard title="Interview Stage" value={data!.applications.interview} icon={CalendarClock} />
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Jobs */}
+      <div>
+        <h2 className="text-lg font-semibold mb-3">Jobs</h2>
+        <div className="w-56">
+          {loading ? <StatCardSkeleton /> : (
             <StatCard title="Total Job Posts" value={data!.jobs.total} icon={Briefcase} />
           )}
         </div>
       </div>
+
+      {/* Rankings */}
+      <div>
+        <h2 className="text-lg font-semibold mb-3">Rankings</h2>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 items-start">
+          <RankedList
+            title="Top 10 Companies by Job Posts"
+            items={loading ? [] : data!.topCompaniesByJobs}
+            label="jobs"
+            loading={loading}
+            skeletonCount={10}
+          />
+          <RankedList
+            title="Top 3 Companies by Applicants"
+            items={loading ? [] : data!.topCompaniesByApplicants}
+            label="applicants"
+            loading={loading}
+            skeletonCount={3}
+          />
+          <RankedList
+            title="Applicants per Company"
+            items={loading ? [] : data!.applicantsPerCompany}
+            label="applicants"
+            loading={loading}
+            skeletonCount={5}
+          />
+        </div>
+      </div>
+
     </div>
   );
 }

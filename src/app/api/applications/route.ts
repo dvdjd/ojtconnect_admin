@@ -10,7 +10,9 @@ export async function POST(request: Request) {
     const where: Record<string, unknown> = {};
 
     if (filters.status && filters.status !== "all") {
-      where.status = filters.status;
+      where.status = filters.status === "Not Selected"
+        ? { in: ["Not Selected", "rejected"] }
+        : filters.status;
     }
 
     if (filters.company && filters.company.trim() !== "") {
