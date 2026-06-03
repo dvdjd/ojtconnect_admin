@@ -14,6 +14,8 @@ import {
   CalendarClock,
   UserPlus,
   XCircle,
+  Search,
+  ListChecks,
 } from "lucide-react";
 
 interface RankedItem {
@@ -33,6 +35,8 @@ interface AnalyticsData {
   applications: {
     total: number;
     pending: number;
+    reviewing: number;
+    shortlisted: number;
     accepted: number;
     rejected: number;
     interview: number;
@@ -204,16 +208,18 @@ export function AnalyticsDashboard() {
       {/* Applications */}
       <div>
         <h2 className="text-lg font-semibold mb-3">Applications</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
           {loading ? (
-            Array.from({ length: 5 }).map((_, i) => <StatCardSkeleton key={i} />)
+            Array.from({ length: 7 }).map((_, i) => <StatCardSkeleton key={i} />)
           ) : (
             <>
               <StatCard title="Total" value={data!.applications.total} icon={FileText} />
               <StatCard title="Pending" value={data!.applications.pending} icon={Clock} />
+              <StatCard title="Reviewing" value={data!.applications.reviewing} icon={Search} />
+              <StatCard title="Shortlisted" value={data!.applications.shortlisted} icon={ListChecks} />
+              <StatCard title="For Interview" value={data!.applications.interview} icon={CalendarClock} />
               <StatCard title="Accepted" value={data!.applications.accepted} icon={CheckCircle} />
               <StatCard title="Not Selected" value={data!.applications.rejected} icon={XCircle} />
-              <StatCard title="Interview Stage" value={data!.applications.interview} icon={CalendarClock} />
             </>
           )}
         </div>

@@ -12,6 +12,8 @@ export async function POST(request: Request) {
     if (filters.status && filters.status !== "all") {
       where.status = filters.status === "Not Selected"
         ? { in: ["Not Selected", "rejected"] }
+        : filters.status === "for interview"
+        ? { in: ["for interview", "Interview Stage"] }
         : filters.status;
     }
 

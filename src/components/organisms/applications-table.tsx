@@ -28,8 +28,11 @@ import {
 
 const STATUS_VARIANTS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "secondary",
+  reviewing: "secondary",
+  shortlisted: "default",
   accepted: "default",
   "for interview": "default",
+  "Interview Stage": "default",
   "Not Selected": "destructive",
   withdrawn: "outline",
 };
@@ -37,6 +40,8 @@ const STATUS_VARIANTS: Record<string, "default" | "secondary" | "destructive" | 
 const STATUS_LABELS: Record<string, string> = {
   all: "All status",
   pending: "Pending",
+  reviewing: "Reviewing",
+  shortlisted: "Shortlisted",
   "for interview": "For Interview",
   accepted: "Accepted",
   "Not Selected": "Not Selected",
@@ -106,6 +111,8 @@ export default function ApplicationsTable() {
                 <SelectContent>
                   <SelectItem value="all">All status</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="reviewing">Reviewing</SelectItem>
+                  <SelectItem value="shortlisted">Shortlisted</SelectItem>
                   <SelectItem value="for interview">For Interview</SelectItem>
                   <SelectItem value="accepted">Accepted</SelectItem>
                   <SelectItem value="Not Selected">Not Selected</SelectItem>

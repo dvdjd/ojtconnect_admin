@@ -12,15 +12,21 @@ import type { ApplicationData } from "@/core/hooks/useApplications";
 
 const STATUS_VARIANTS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "secondary",
+  reviewing: "secondary",
+  shortlisted: "default",
   accepted: "default",
   "for interview": "default",
+  "Interview Stage": "default",
   "Not Selected": "destructive",
   withdrawn: "outline",
 };
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pending",
+  reviewing: "Reviewing",
+  shortlisted: "Shortlisted",
   "for interview": "For Interview",
+  "Interview Stage": "For Interview",
   accepted: "Accepted",
   "Not Selected": "Not Selected",
   withdrawn: "Withdrawn",
