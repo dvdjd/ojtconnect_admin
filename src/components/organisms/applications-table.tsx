@@ -84,6 +84,17 @@ export default function ApplicationsTable() {
             </div>
 
             <div className="flex flex-col gap-1.5">
+              <Label htmlFor="filter-position">Position</Label>
+              <Input
+                id="filter-position"
+                placeholder="Search by position…"
+                value={filters.position ?? ""}
+                onChange={(e) => updateFilters({ position: e.target.value || undefined })}
+                className="w-56"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
               <Label>Status</Label>
               <Select
                 value={currentStatus}

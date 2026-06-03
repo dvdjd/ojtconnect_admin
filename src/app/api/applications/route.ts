@@ -15,12 +15,20 @@ export async function POST(request: Request) {
         : filters.status;
     }
 
+    const jobPostFilter: Record<string, unknown> = {};
+
     if (filters.company && filters.company.trim() !== "") {
-      where.job_post = {
-        company_profile: {
-          name: { contains: filters.company.trim(), mode: "insensitive" },
-        },
+      jobPostFilter.company_profile = {
+        name: { contains: filters.company.trim(), mode: "insensitive" },
       };
+    }
+
+    if (filters.position && filters.position.trim() !== "") {
+      jobPostFilter.position = { contains: filters.position.trim(), mode: "insensitive" };
+    }
+
+    if (Object.keys(jobPostFilter).length > 0) {
+      where.job_post = jobPostFilter;
     }
 
     const [applications, total] = await Promise.all([

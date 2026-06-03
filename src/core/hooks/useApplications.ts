@@ -39,6 +39,7 @@ export interface ApplicationData {
 
 interface Filters {
   company?: string;
+  position?: string;
   status?: string;
 }
 

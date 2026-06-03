@@ -95,41 +95,45 @@ function RankedList({
   label,
   loading,
   skeletonCount = 3,
+  scrollable = false,
 }: {
   title: string;
   items: RankedItem[];
   label: string;
   loading: boolean;
   skeletonCount?: number;
+  scrollable?: boolean;
 }) {
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
-        {loading ? (
-          Array.from({ length: skeletonCount }).map((_, i) => (
-            <div key={i} className="flex items-center justify-between">
-              <Skeleton className="h-4 w-40" />
-              <Skeleton className="h-4 w-8" />
-            </div>
-          ))
-        ) : items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No data available.</p>
-        ) : (
-          items.map((item, i) => (
-            <div key={i} className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="text-xs font-medium text-muted-foreground w-5 shrink-0">{i + 1}.</span>
-                <span className="text-sm truncate">{item.name}</span>
+      <CardContent>
+        <div className={scrollable ? "max-h-72 overflow-y-auto pr-1 space-y-2" : "space-y-2"}>
+          {loading ? (
+            Array.from({ length: skeletonCount }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-8" />
               </div>
-              <span className="text-sm font-semibold shrink-0">
-                {item.count.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">{label}</span>
-              </span>
-            </div>
-          ))
-        )}
+            ))
+          ) : items.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No data available.</p>
+          ) : (
+            items.map((item, i) => (
+              <div key={i} className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xs font-medium text-muted-foreground w-5 shrink-0">{i + 1}.</span>
+                  <span className="text-sm truncate">{item.name}</span>
+                </div>
+                <span className="text-sm font-semibold shrink-0">
+                  {item.count.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">{label}</span>
+                </span>
+              </div>
+            ))
+          )}
+        </div>
       </CardContent>
     </Card>
   );
@@ -249,6 +253,7 @@ export function AnalyticsDashboard() {
             label="applicants"
             loading={loading}
             skeletonCount={5}
+            scrollable
           />
         </div>
       </div>
