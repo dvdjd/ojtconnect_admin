@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/utils/api";
 import { Button } from "@/components/ui/button";
@@ -101,6 +101,43 @@ export default function RolePermissionsTable() {
     }
   };
 
+  const moveRoute = async (index: number, direction: "up" | "down") => {
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    if (swapIndex < 0 || swapIndex >= navRoutes.length) return;
+
+    const itemA = navRoutes[index];
+    const itemB = navRoutes[swapIndex];
+
+    // Reassign sort_orders: give each item the other's sort_order value.
+    // If they happen to be equal, assign positional values to force a difference.
+    const orderA = itemB.sort_order !== itemA.sort_order
+      ? itemB.sort_order
+      : swapIndex;
+    const orderB = itemB.sort_order !== itemA.sort_order
+      ? itemA.sort_order
+      : index;
+
+    const updated = navRoutes.map((r) => {
+      if (r.id === itemA.id) return { ...r, sort_order: orderA };
+      if (r.id === itemB.id) return { ...r, sort_order: orderB };
+      return r;
+    });
+
+    // Re-sort by new sort_order so the row moves visually
+    updated.sort((a, b) => a.sort_order - b.sort_order);
+    setNavRoutes(updated);
+
+    try {
+      await api.patch("/api/nav-routes", [
+        { id: itemA.id, sort_order: orderA },
+        { id: itemB.id, sort_order: orderB },
+      ]);
+    } catch {
+      toast.error("Failed to update order.");
+      setNavRoutes(navRoutes);
+    }
+  };
+
   const deleteRoute = async (id: number) => {
     try {
       await api.delete("/api/nav-routes", { id });
@@ -140,7 +177,7 @@ export default function RolePermissionsTable() {
                   </tr>
                 </thead>
                 <tbody>
-                  {navRoutes.map((nav) => (
+                  {navRoutes.map((nav, index) => (
                     <tr key={nav.route} className="border-b last:border-0">
                       <td className="py-3 px-4 font-medium">
                         <div className="flex flex-col">
@@ -159,15 +196,37 @@ export default function RolePermissionsTable() {
                         </td>
                       ))}
                       <td className="py-3 px-4 text-right">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-7 w-7 hover:bg-destructive hover:text-white hover:border-destructive"
-                          onClick={() => deleteRoute(nav.id)}
-                          title="Remove route"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => moveRoute(index, "up")}
+                            disabled={index === 0}
+                            title="Move up"
+                          >
+                            <ArrowUp className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => moveRoute(index, "down")}
+                            disabled={index === navRoutes.length - 1}
+                            title="Move down"
+                          >
+                            <ArrowDown className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-7 w-7 hover:bg-destructive hover:text-white hover:border-destructive"
+                            onClick={() => deleteRoute(nav.id)}
+                            title="Remove route"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}

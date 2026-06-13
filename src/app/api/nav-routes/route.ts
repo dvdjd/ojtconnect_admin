@@ -28,6 +28,24 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function PATCH(req: NextRequest) {
+  const denied = await requireRole(req, ["super_admin"]);
+  if (denied) return denied;
+
+  try {
+    const updates: { id: number; sort_order: number }[] = await req.json();
+    await prisma.$transaction(
+      updates.map(({ id, sort_order }) =>
+        prisma.nav_route.update({ where: { id }, data: { sort_order } })
+      )
+    );
+    return NextResponse.json({ status: "success" });
+  } catch (error) {
+    console.error("Prisma error:", error);
+    return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
+  }
+}
+
 export async function DELETE(req: NextRequest) {
   const denied = await requireRole(req, ["super_admin"]);
   if (denied) return denied;

@@ -51,9 +51,9 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ role, navRoutes = [], allowedRoutes = [] }: AppSidebarProps) {
-  const navItems = navRoutes.filter(
-    (item) => !role || allowedRoutes.includes(item.route)
-  );
+  const navItems = navRoutes
+    .filter((item) => !role || allowedRoutes.includes(item.route))
+    .sort((a, b) => a.sort_order - b.sort_order);
 
   return (
     <Sidebar>
