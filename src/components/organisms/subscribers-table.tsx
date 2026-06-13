@@ -173,7 +173,7 @@ export default function SubscribersTable() {
 
   const openAction = (kind: ActionKind, sub: Subscriber) => {
     setOpenMenu(null);
-    if (kind === "remove") {
+    if (kind === "remove" || kind === "renew") {
       setPendingAction({ kind, subscription: sub });
       return;
     }
@@ -256,7 +256,7 @@ export default function SubscribersTable() {
 
           <div className="flex flex-col gap-1.5">
             <Label>Type</Label>
-            <Select value={typeFilter} onValueChange={(v) => handleFilterChange({ type: v })}>
+            <Select value={typeFilter} onValueChange={(v) => handleFilterChange({ type: v ?? "all" })}>
               <SelectTrigger className="w-36">
                 <span className="text-sm capitalize">{typeFilter === "all" ? "All types" : typeFilter}</span>
               </SelectTrigger>
@@ -270,7 +270,7 @@ export default function SubscribersTable() {
 
           <div className="flex flex-col gap-1.5">
             <Label>Status</Label>
-            <Select value={statusFilter} onValueChange={(v) => handleFilterChange({ status: v })}>
+            <Select value={statusFilter} onValueChange={(v) => handleFilterChange({ status: v ?? "all" })}>
               <SelectTrigger className="w-36">
                 <span className="text-sm capitalize">{statusFilter === "all" ? "All status" : statusFilter}</span>
               </SelectTrigger>
