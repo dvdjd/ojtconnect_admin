@@ -254,7 +254,7 @@ export function AddUniversitySubscriptionDialog({ open, onOpenChange, onSuccess 
 
             <div className="flex flex-col gap-1.5">
               <Label>Subscription Plan</Label>
-              <Select value={planId} onValueChange={setPlanId} disabled={loadingOptions}>
+              <Select value={planId} onValueChange={(v) => setPlanId(v ?? "")} disabled={loadingOptions}>
                 <SelectTrigger className="w-full">
                   <span className={`text-sm capitalize ${!selectedPlan ? "text-muted-foreground" : ""}`}>
                     {loadingOptions
@@ -289,7 +289,7 @@ export function AddUniversitySubscriptionDialog({ open, onOpenChange, onSuccess 
 
             <div className="flex flex-col gap-1.5">
               <Label>Billing Cycle</Label>
-              <Select value={billingCycle} onValueChange={handleBillingCycleChange}>
+              <Select value={billingCycle} onValueChange={(v) => v && handleBillingCycleChange(v)}>
                 <SelectTrigger>
                   <span className="text-sm capitalize">{billingCycle}</span>
                 </SelectTrigger>
