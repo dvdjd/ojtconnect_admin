@@ -38,7 +38,7 @@ export async function GET() {
       prisma.application.count({ where: { status: "pending" } }),
       prisma.application.count({ where: { status: "reviewing" } }),
       prisma.application.count({ where: { status: "shortlisted" } }),
-      prisma.application.count({ where: { status: "accepted" } }),
+      prisma.application.count({ where: { status: { in: ["accepted", "Selected"] } } }),
       prisma.application.count({ where: { status: { in: ["Not Selected", "rejected"] } } }),
       prisma.application.count({ where: { status: { in: ["for interview", "Interview Stage"] } } }),
       prisma.user_access.count({ where: { type: "student", date_created: { gte: sevenDaysAgo } } }),
