@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye } from "lucide-react";
+import { Download, Eye } from "lucide-react";
 import { useApplications, type ApplicationData } from "@/core/hooks/useApplications";
 import { ApplicationDetailsDialog } from "@/components/organisms/application-details-dialog";
 import { PaginationControls } from "@/components/molecules/pagination-controls";
@@ -64,8 +64,34 @@ export default function ApplicationsTable() {
 
   const [selectedApp, setSelectedApp] = useState<ApplicationData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const currentStatus = filters.status ?? "all";
+
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      const params = new URLSearchParams();
+      if (filters.status) params.set("status", filters.status);
+      if (filters.company) params.set("company", filters.company);
+      if (filters.position) params.set("position", filters.position);
+
+      const response = await fetch(`/api/applications/export?${params.toString()}`);
+      if (!response.ok) throw new Error("Export failed");
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `applications-${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // silently fail — user will see nothing downloaded
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <>
@@ -76,7 +102,8 @@ export default function ApplicationsTable() {
         <CardContent className="space-y-4">
 
           {/* Filters */}
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="flex flex-wrap gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="filter-company">Company</Label>
               <Input
@@ -120,6 +147,17 @@ export default function ApplicationsTable() {
                 </SelectContent>
               </Select>
             </div>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCSV}
+              disabled={exporting || loading}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              {exporting ? "Exporting…" : "Export CSV"}
+            </Button>
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}
