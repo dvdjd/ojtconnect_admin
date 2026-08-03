@@ -75,6 +75,7 @@ export default function ApplicationsTable() {
       if (filters.status) params.set("status", filters.status);
       if (filters.company) params.set("company", filters.company);
       if (filters.position) params.set("position", filters.position);
+      if (filters.email) params.set("email", filters.email);
 
       const response = await fetch(`/api/applications/export?${params.toString()}`);
       if (!response.ok) throw new Error("Export failed");
@@ -111,6 +112,17 @@ export default function ApplicationsTable() {
                 placeholder="Search by company…"
                 value={filters.company ?? ""}
                 onChange={(e) => updateFilters({ company: e.target.value || undefined })}
+                className="w-56"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="filter-email">Email</Label>
+              <Input
+                id="filter-email"
+                placeholder="Search by email…"
+                value={filters.email ?? ""}
+                onChange={(e) => updateFilters({ email: e.target.value || undefined })}
                 className="w-56"
               />
             </div>
@@ -168,6 +180,7 @@ export default function ApplicationsTable() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Student</TableHead>
+                  <TableHead>Email</TableHead>
                   <TableHead>Position</TableHead>
                   <TableHead>Company</TableHead>
                   <TableHead>Status</TableHead>
@@ -180,6 +193,7 @@ export default function ApplicationsTable() {
                   Array.from({ length: 5 }).map((_, i) => (
                     <TableRow key={i}>
                       <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-40" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
@@ -189,7 +203,7 @@ export default function ApplicationsTable() {
                   ))
                 ) : applications.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                    <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                       No applications found.
                     </TableCell>
                   </TableRow>
@@ -207,6 +221,7 @@ export default function ApplicationsTable() {
                     return (
                       <TableRow key={app.application_id}>
                         <TableCell className="font-medium">{studentName}</TableCell>
+                        <TableCell className="text-muted-foreground">{app.student_profile.user_access?.email ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{app.job_post.position ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{app.job_post.company_profile.name}</TableCell>
                         <TableCell>

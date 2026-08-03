@@ -34,6 +34,9 @@ export interface ApplicationData {
     last_name?: string | null;
     university?: string | null;
     course?: string | null;
+    user_access?: {
+      email?: string | null;
+    } | null;
   };
 }
 
@@ -41,6 +44,7 @@ interface Filters {
   company?: string;
   position?: string;
   status?: string;
+  email?: string;
 }
 
 interface IResponse {

@@ -31,6 +31,7 @@ export async function GET(request: Request) {
     const status = searchParams.get("status");
     const company = searchParams.get("company");
     const position = searchParams.get("position");
+    const email = searchParams.get("email");
 
     const where: Record<string, unknown> = {};
 
@@ -59,6 +60,14 @@ export async function GET(request: Request) {
 
     if (Object.keys(jobPostFilter).length > 0) {
       where.job_post = jobPostFilter;
+    }
+
+    if (email && email.trim() !== "") {
+      where.student_profile = {
+        user_access: {
+          email: { contains: email.trim(), mode: "insensitive" },
+        },
+      };
     }
 
     const applications = await prisma.application.findMany({

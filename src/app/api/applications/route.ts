@@ -35,6 +35,14 @@ export async function POST(request: Request) {
       where.job_post = jobPostFilter;
     }
 
+    if (filters.email && filters.email.trim() !== "") {
+      where.student_profile = {
+        user_access: {
+          email: { contains: filters.email.trim(), mode: "insensitive" },
+        },
+      };
+    }
+
     const [applications, total] = await Promise.all([
       prisma.application.findMany({
         where,
@@ -42,7 +50,9 @@ export async function POST(request: Request) {
           job_post: {
             include: { company_profile: true },
           },
-          student_profile: true,
+          student_profile: {
+            include: { user_access: true },
+          },
         },
         skip: (page - 1) * pageSize,
         take: pageSize,
