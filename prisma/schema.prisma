@@ -72,7 +72,7 @@ model company_profile {
   address_line          String?                 @db.VarChar(128)
   city                  String?                 @db.VarChar(100)
   number_of_employees   String?                 @db.VarChar(50)
-  work_setup            String?                 @db.VarChar(50)
+  work_setup            String[]
   industry_type         String?                 @db.VarChar(100)
   parent_company_id     String?
   platform_role         String?                 @db.VarChar(50)
