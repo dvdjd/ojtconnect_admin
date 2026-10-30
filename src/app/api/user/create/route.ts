@@ -1,11 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { generateId } from "@/lib/utils/generate-id";
+import { requireRole } from "@/lib/utils/require-role";
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const denied = await requireRole(request, ["super_admin", "recruitment", "marketing"]);
+  if (denied) return denied;
+
   try {
     const { email, password, type } = await request.json();
 
