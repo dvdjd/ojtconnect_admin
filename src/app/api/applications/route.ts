@@ -1,9 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireRole } from "@/lib/utils/require-role";
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const denied = await requireRole(request, ["super_admin", "marketing", "recruitment"]);
+  if (denied) return denied;
+
   try {
     const { filters = {}, page = 1, pageSize = 10 } = await request.json();
 

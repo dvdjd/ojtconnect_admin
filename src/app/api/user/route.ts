@@ -1,7 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireRole } from "@/lib/utils/require-role";
 
-export async function POST(request: Request) {
+const USERS_ROUTE_ROLES = ["super_admin", "recruitment", "marketing"];
+
+export async function POST(request: NextRequest) {
+  const denied = await requireRole(request, USERS_ROUTE_ROLES);
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { filters, page, pageSize } = body;
@@ -44,7 +50,10 @@ export async function POST(request: Request) {
   }
 }
 
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
+  const denied = await requireRole(request, USERS_ROUTE_ROLES);
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { user_id } = body;
@@ -68,7 +77,10 @@ export async function PUT(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
+  const denied = await requireRole(request, USERS_ROUTE_ROLES);
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { user_id } = body;
