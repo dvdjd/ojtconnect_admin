@@ -1,10 +1,16 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { randomUUID } from "crypto";
+import { requireRole } from "@/lib/utils/require-role";
 
 export const runtime = "nodejs";
 
-export async function GET() {
+const SUBSCRIBERS_ROUTE_ROLES = ["super_admin", "marketing"];
+
+export async function GET(request: NextRequest) {
+  const denied = await requireRole(request, SUBSCRIBERS_ROUTE_ROLES);
+  if (denied) return denied;
+
   try {
     const [allUniversities, activeSubscriptions, plans] = await Promise.all([
       prisma.university.findMany({
@@ -33,7 +39,10 @@ export async function GET() {
   }
 }
 
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
+  const denied = await requireRole(request, SUBSCRIBERS_ROUTE_ROLES);
+  if (denied) return denied;
+
   try {
     const { subscription_id, plan_id, renew } = await request.json();
     if (!subscription_id) {
@@ -76,7 +85,10 @@ export async function PATCH(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
+  const denied = await requireRole(request, SUBSCRIBERS_ROUTE_ROLES);
+  if (denied) return denied;
+
   try {
     const { subscription_id } = await request.json();
     if (!subscription_id) {
@@ -93,7 +105,10 @@ export async function DELETE(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const denied = await requireRole(request, SUBSCRIBERS_ROUTE_ROLES);
+  if (denied) return denied;
+
   try {
     const { university_id, plan_id, billing_cycle, current_period_start, current_period_end } =
       await request.json();
