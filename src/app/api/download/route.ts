@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireRole } from "@/lib/utils/require-role";
 
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
+  const denied = await requireRole(request, ["super_admin", "marketing", "recruitment"]);
+  if (denied) return denied;
+
   const { searchParams } = request.nextUrl;
   const file = searchParams.get("file");
   const name = searchParams.get("name");

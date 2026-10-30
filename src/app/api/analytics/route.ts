@@ -1,7 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireRole } from "@/lib/utils/require-role";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const denied = await requireRole(request, ["super_admin", "marketing", "recruitment"]);
+  if (denied) return denied;
+
   try {
     const now = new Date();
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
